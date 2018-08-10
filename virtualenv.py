@@ -1286,13 +1286,18 @@ def install_python(home_dir, lib_dir, inc_dir, bin_dir, site_packages, clear, sy
             pythonlib_dest_dir = os.path.join(lib_dir, "..", "libs")
             logger.info('Created %s', pythonlib_dest_dir)
             mkdir(pythonlib_dest_dir)
-            for template in {'python%s%s.lib', 'libpython%s%s.a'}:
-                pythonlib_name = template % (sys.version_info[0], sys.version_info[1])
-                pythonlib = os.path.join(os.path.dirname(sys.executable), "libs", pythonlib_name)
-                pythonlib_dest = os.path.join(pythonlib_dest_dir, pythonlib_name)
-                if os.path.exists(pythonlib):
-                    logger.info('Also created %s' % pythonlib_name)
-                    shutil.copyfile(pythonlib, pythonlib_dest)
+            import glob
+            for pythonlib in glob.glob(os.path.join(os.path.dirname(sys.executable), "libs", "*")):
+                pythonlib_dest = os.path.join(pythonlib_dest_dir, os.path.basename(pythonlib))
+                logger.info('Also created %s' % os.path.basename(pythonlib))
+                shutil.copyfile(pythonlib, pythonlib_dest)
+#             for template in {'python%s%s.lib', 'libpython%s%s.a'}:
+#                 pythonlib_name = template % (sys.version_info[0], sys.version_info[1])
+#                 pythonlib = os.path.join(os.path.dirname(sys.executable), "libs", pythonlib_name)
+#                 pythonlib_dest = os.path.join(pythonlib_dest_dir, pythonlib_name)
+#                 if os.path.exists(pythonlib):
+#                     logger.info('Also created %s' % pythonlib_name)
+#                     shutil.copyfile(pythonlib, pythonlib_dest)
 
         if is_pypy:
             # make a symlink python --> pypy-c
