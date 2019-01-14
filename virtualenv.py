@@ -1383,18 +1383,28 @@ def install_python(home_dir, lib_dir, inc_dir, bin_dir, site_packages, clear, sy
                 ]
 
             for py_executable_dll, py_executable_dll_d in py_executable_dll_s:
-                python_dll = os.path.join(os.path.dirname(sys.executable), py_executable_dll)
-                python_dll_d = os.path.join(os.path.dirname(sys.executable), py_executable_dll_d)
-                python_dll_d_dest = os.path.join(os.path.dirname(py_executable), py_executable_dll_d)
+                source_base_path = os.path.dirname(sys.executable)
+                destination_base_path = os.path.dirname(py_executable)
+                if IS_WIN:
+                    # On windows, python import libraries are located in "<root>/libs" directory.
+                    # the following code will ensure that we're looking for libraries on the correct directory.
+                    source_base_path = os.path.join(source_base_path, "libs")
+                    destination_base_path = os.path.join(destination_base_path, "libs")
+
+                python_dll = os.path.join(source_base_path, py_executable_dll)
+                python_dll_dest = os.path.join(destination_base_path, py_executable_dll)
+                python_dll_d = os.path.join(source_base_path, py_executable_dll_d)
+                python_dll_d_dest = os.path.join(destination_base_path, py_executable_dll_d)
                 if os.path.exists(python_dll):
                     logger.info("Also created %s", py_executable_dll)
-                    shutil.copyfile(python_dll, os.path.join(os.path.dirname(py_executable), py_executable_dll))
+                    shutil.copyfile(python_dll, python_dll_dest)
                 if os.path.exists(python_dll_d):
                     logger.info("Also created %s", py_executable_dll_d)
                     shutil.copyfile(python_dll_d, python_dll_d_dest)
                 elif os.path.exists(python_dll_d_dest):
                     logger.info("Removed %s as the source does not exist", python_dll_d_dest)
                     os.unlink(python_dll_d_dest)
+
         if IS_PYPY:
             # make a symlink python --> pypy-c
             python_executable = os.path.join(os.path.dirname(py_executable), "python")
